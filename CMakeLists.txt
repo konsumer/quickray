@@ -7,7 +7,7 @@ set(CMAKE_C_STANDARD 99)
 set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE) # don't build the supplied examples
 set(BUILD_GAMES    OFF CACHE BOOL "" FORCE) # or games
 
-# TODO: build quickjs first, even though it doesn't use cmake
+# TODO: build quickjs first, see https://cmake.org/cmake/help/latest/module/ExternalProject.html
 # TODO: build raylib parser? Maybe not needed, as we already have lib/raylib/parser/raylib_api.json
 # TODO: generate dll-source (for quickjs) and any js/ts to wrap around that
 
