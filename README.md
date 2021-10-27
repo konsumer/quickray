@@ -6,8 +6,6 @@ This is an attempt to generate a native wrapper around raylib, for quickjs, usin
 
 > I am still working out ideas on this, and it's not usable. Check back!
 
-First I will work out some basic ideas in `explore/` for how to do this, then I will finish up the generator.
-
 ```
 git clone --recursive https://github.com/konsumer/quickray.git
 cd quickray/build
