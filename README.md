@@ -1,6 +1,7 @@
 # quickray
 
 # WIP
+
 > I am still working out ideas on this, and it's not usable. Check back!
 
 This is an attempt to generate a native wrapper around raylib, for quickjs, using a script written for quickjs.
@@ -14,3 +15,8 @@ cmake ..
 ```
 
 This will produce a few .so files, and `qjs` binary you should include with your JS app.
+
+
+## notes
+
+Dang! just use [this](https://github.com/raysan5/raylib/blob/master/parser/raylib_api.json) for parsing. Much better.
