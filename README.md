@@ -13,4 +13,4 @@ cd quickray/build
 cmake ..
 ```
 
-This will produce a few .so files you should include with your JS app.
+This will produce a few .so files, and `qjs` binary you should include with your JS app.
