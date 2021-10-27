@@ -5,6 +5,7 @@ const regexes = {
 }
 
 // TODO: I need a lot more in/out types
+// TODO: use lib/raylib/parser/raylib_api.json instead of parsing myself
 
 // map of input-type to function that the function-body to convert it
 const inputTypes = {
