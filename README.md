@@ -1,5 +1,8 @@
 # quickray
 
+# WIP
+> I am still working out ideas on this, and it's not usable. Check back!
+
 This is an attempt to generate a native wrapper around raylib, for quickjs, using a script written for quickjs.
 
 First I will work out some basic ideas in explore/ for how to do this, then I will finish up the generator.
