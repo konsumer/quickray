@@ -10,6 +10,7 @@ This is an attempt to generate a native wrapper around raylib, for quickjs, usin
 git clone --recursive https://github.com/konsumer/quickray.git
 cd quickray/build
 cmake ..
+make
 ```
 
 This will produce a few .so files, and `qjs` binary you should include with your JS app.
@@ -19,3 +20,4 @@ This will produce a few .so files, and `qjs` binary you should include with your
 
 - Dang! just use [raylib_api.json](https://github.com/raysan5/raylib/blob/master/parser/raylib_api.json) for parsing. Much better.
 - make a little indent function to make templates easier to read.
+- get cmake for submodules working and link to them
