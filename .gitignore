@@ -1,0 +1,5 @@
+# keep directories with .gitkeep in them
+!/**/.gitkeep
+
+.DS_Store
+/build/*
