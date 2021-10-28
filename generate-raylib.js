@@ -1,11 +1,12 @@
 // this will generate quickray.c from current API
 // run with ./lib/quickjs/qjs generate-raylib.js
+
 import { loadFile } from 'std'
 
 const { enums, structs, functions } = JSON.parse(loadFile('lib/raylib/parser/raylib_api.json'))
 
 // simple helper to simplify output-types
-const call = func => `${func.name}(${Object.values(func.params || {}).join(', ')})`
+const call = func => `${func.name}(${Object.keys(func.params || {}).join(', ')})`
 
 // I outputted the input/output names like this:
 /*
@@ -75,32 +76,32 @@ const inputTypes = {
   'Wave *': () => [],
 
   bool: (p, i) => [
-    `bool ${p.name} = JS_ToBool(ctx, argv[${i}]);`
+    `bool ${p} = JS_ToBool(ctx, argv[${i}]);`
   ],
 
   char: (p, i) => [
-    `const char ${p.name} = NULL;`,
-    `${p.name} = JS_ToCString(ctx, argv[${i}]);`,
+    `const char ${p} = NULL;`,
+    `${p} = JS_ToCString(ctx, argv[${i}]);`,
     'if (title == NULL) return JS_EXCEPTION;'
   ],
 
   'char *': (p, i) => [
-    `const char ${p.name} = NULL;`,
-    `${p.name} = JS_ToCString(ctx, argv[${i}]);`,
+    `const char ${p} = NULL;`,
+    `${p} = JS_ToCString(ctx, argv[${i}]);`,
     'if (title == NULL) return JS_EXCEPTION;'
   ],
 
   'const CharInfo *': () => [],
 
   'const char *': (p, i) => [
-    `const char ${p.name} = NULL;`,
-    `${p.name} = JS_ToCString(ctx, argv[${i}]);`,
+    `const char ${p} = NULL;`,
+    `${p} = JS_ToCString(ctx, argv[${i}]);`,
     'if (title == NULL) return JS_EXCEPTION;'
   ],
 
   'const char **': (p, i) => [
-    `const char ${p.name} = NULL;`,
-    `${p.name} = JS_ToCString(ctx, argv[${i}]);`,
+    `const char ${p} = NULL;`,
+    `${p} = JS_ToCString(ctx, argv[${i}]);`,
     'if (title == NULL) return JS_EXCEPTION;'
   ],
 
@@ -108,8 +109,17 @@ const inputTypes = {
   'const void *': () => [],
   float: () => [],
   'float *': () => [],
-  int: () => [],
-  'int *': () => [],
+
+  int: (p, i) => [
+    `int ${p};`,
+    `if (JS_ToInt32(ctx, ${p}, argv[${i}])) return JS_EXCEPTION;`
+  ],
+
+  'int *': (p, i) => [
+    `int ${p};`,
+    `if (JS_ToInt32(ctx, ${p}, argv[${i}])) return JS_EXCEPTION;`
+  ],
+
   'unsigned char *': () => [],
   'unsigned int': () => [],
   'unsigned int *': () => [],
@@ -169,6 +179,62 @@ const outputTypes = {
   long: () => [],
   'unsigned char *': () => [],
   'unsigned int': () => [],
-  void: () => [],
-  'void *': () => []
+
+  void: m => [
+    `${call(m)};`,
+    'return JS_UNDEFINED;'
+  ],
+
+  'void *': m => [
+    `${call(m)};`,
+    'return JS_UNDEFINED;'
+  ]
 }
+
+const fstring = functions.map(method => `
+// ${method.name}: ${method.description}
+static JSValue wrapped_${method.name}(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+  ${Object.keys(method.params || {}).map((p, i) => {
+    if (inputTypes[method.params[p]]) {
+      return inputTypes[method.params[p]](p, i).join('\n  ')
+    } else {
+      return false
+    }
+  }).filter(f => f).join('\n\n  ')}
+
+  ${outputTypes[method.returnType](method).join('\n  ')}
+}
+`).join('\n  ')
+
+const liststring = functions.map(method => `
+  JS_CFUNC_DEF("${method.name}", ${Object.values(method.params || {}).length}, wrapped_${method.name})`
+).join(',')
+
+const out = `// This was auto-generated. Run qjs generate-raylib.js
+#include "stdio.h"
+#include "string.h"
+#include "quickjs/quickjs.h"
+#include "quickjs/cutils.h"
+#include "raylib.h"
+
+#define JS_ATOM_length 48
+
+${fstring}
+
+static const JSCFunctionListEntry wrapped_js_funcs[] = {
+  ${liststring}
+};
+
+static int js_rl_init(JSContext* ctx, JSModuleDef* m) {
+  js_rl_init_classes(ctx, m);
+  return JS_SetModuleExportList(ctx, m, wrapped_js_funcs, countof(wrapped_js_funcs));
+}
+
+JSModuleDef* js_init_module(JSContext* ctx, const char* module_name) {
+  JSModuleDef* m = JS_NewCModule(ctx, module_name, js_rl_init);
+  if (!m) return NULL;
+  JS_AddModuleExportList(ctx, m, wrapped_js_funcs, countof(wrapped_js_funcs));
+  js_rl_init_module_classes(ctx, m);
+  return m;
+}`
+console.log(out)
