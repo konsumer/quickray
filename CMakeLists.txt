@@ -8,7 +8,10 @@ project(
   DESCRIPTION "QuickJS native module for raylib"
 )
 
-include_directories(lib)
+message(${CMAKE_CURRENT_SOURCE_DIR}/lib)
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/raylib/src)
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING
@@ -31,14 +34,13 @@ ExternalProject_Add(
   BUILD_COMMAND make
 )
 
-# this doesn't seem to work
-# add_custom_command(
-#   OUTPUT quickray.c
-#   COMMAND "./lib/quickjs/qjs generate-raylib.js > quickray.c"
-#   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-# )
+add_custom_command(
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/quickray.c
+  COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/lib/quickjs/qjs ${CMAKE_CURRENT_SOURCE_DIR}/generate-raylib.js ${CMAKE_CURRENT_SOURCE_DIR}/lib/raylib/parser/raylib_api.json > ${CMAKE_CURRENT_BINARY_DIR}/quickray.c
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
 
 add_library(
   quickray
-  SHARED quickray.c
+  SHARED ${CMAKE_CURRENT_BINARY_DIR}/quickray.c
 )

@@ -1,9 +1,11 @@
 // this will generate quickray.c from current API
-// run with ./lib/quickjs/qjs generate-raylib.js > quickray.c
+// run with ./lib/quickjs/qjs generate-raylib.js lib/raylib/parser/raylib_api.json > quickray.c
+
+/* global scriptArgs */
 
 import { loadFile } from 'std'
 
-const { enums, structs, functions } = JSON.parse(loadFile('lib/raylib/parser/raylib_api.json'))
+const { enums, structs, functions } = JSON.parse(loadFile(scriptArgs[1]))
 
 // simple helper to simplify output-types
 const call = func => `${func.name}(${Object.keys(func.params || {}).join(', ')})`
