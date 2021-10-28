@@ -1,5 +1,5 @@
 // this will generate quickray.c from current API
-// run with ./lib/quickjs/qjs generate-raylib.js
+// run with ./lib/quickjs/qjs generate-raylib.js > quickray.c
 
 import { loadFile } from 'std'
 
@@ -82,13 +82,13 @@ const inputTypes = {
   char: (p, i) => [
     `const char ${p} = NULL;`,
     `${p} = JS_ToCString(ctx, argv[${i}]);`,
-    'if (title == NULL) return JS_EXCEPTION;'
+    `if (${p} == NULL) return JS_EXCEPTION;`
   ],
 
   'char *': (p, i) => [
     `const char ${p} = NULL;`,
     `${p} = JS_ToCString(ctx, argv[${i}]);`,
-    'if (title == NULL) return JS_EXCEPTION;'
+    `if (${p} == NULL) return JS_EXCEPTION;`
   ],
 
   'const CharInfo *': () => [],
@@ -96,13 +96,13 @@ const inputTypes = {
   'const char *': (p, i) => [
     `const char ${p} = NULL;`,
     `${p} = JS_ToCString(ctx, argv[${i}]);`,
-    'if (title == NULL) return JS_EXCEPTION;'
+    `if (${p} == NULL) return JS_EXCEPTION;`
   ],
 
   'const char **': (p, i) => [
     `const char ${p} = NULL;`,
     `${p} = JS_ToCString(ctx, argv[${i}]);`,
-    'if (title == NULL) return JS_EXCEPTION;'
+    `if (${p} == NULL) return JS_EXCEPTION;`
   ],
 
   'const unsigned char *': () => [],
@@ -200,15 +200,13 @@ static JSValue wrapped_${method.name}(JSContext* ctx, JSValueConst this_val, int
     } else {
       return false
     }
-  }).filter(f => f).join('\n\n  ')}
+  }).filter(f => f).join('\n  ')}
 
   ${outputTypes[method.returnType](method).join('\n  ')}
 }
-`).join('\n  ')
+`).join('\n  ').replace(/ {2}\n/g, '')
 
-const liststring = functions.map(method => `
-  JS_CFUNC_DEF("${method.name}", ${Object.values(method.params || {}).length}, wrapped_${method.name})`
-).join(',')
+const liststring = functions.map(method => `JS_CFUNC_DEF("${method.name}", ${Object.values(method.params || {}).length}, wrapped_${method.name})`).join(',\n  ')
 
 const out = `// This was auto-generated. Run qjs generate-raylib.js
 #include "stdio.h"

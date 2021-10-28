@@ -14,10 +14,3 @@ make
 ```
 
 This will produce a few .so files, and `qjs` binary you should include with your JS app.
-
-
-## todo
-
-- Dang! just use [raylib_api.json](https://github.com/raysan5/raylib/blob/master/parser/raylib_api.json) for parsing. Much better.
-- make a little indent function to make templates easier to read.
-- get cmake for submodules working and link to them

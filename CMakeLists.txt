@@ -8,32 +8,35 @@ project(
   DESCRIPTION "QuickJS native module for raylib"
 )
 
+include_directories(lib)
+
 if(NOT CMAKE_BUILD_TYPE)
-  set(
-    CMAKE_BUILD_TYPE "RelWithDebInfo"
-    CACHE STRING "Default build type: RelWithDebInfo" FORCE
-  )
-endif()
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING
+      "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel."
+      FORCE)
+endif(NOT CMAKE_BUILD_TYPE)
 
 # Setting parameters & build for raylib
 set(OpenGL_GL_PREFERENCE GLVND)
 set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE) # don't build the supplied examples
 set(BUILD_GAMES    OFF CACHE BOOL "" FORCE) # or games
-add_subdirectory(lib/raylib)
-
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/raylib)
 
 # TODO: using BUILD_IN_SOURCE against recommendation. might be possible to use it without
 ExternalProject_Add(
   quickjs
   BUILD_IN_SOURCE TRUE
-  SOURCE_DIR ../lib/quickjs
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/quickjs
   CONFIGURE_COMMAND ""
   BUILD_COMMAND make
-  INSTALL_COMMAND ""
 )
-include_directories(lib)
 
-# TODO: generate quickray.c (for quickjs) from lib/raylib/parser/raylib_api.json before build
+# this doesn't seem to work
+# add_custom_command(
+#   OUTPUT quickray.c
+#   COMMAND "./lib/quickjs/qjs generate-raylib.js > quickray.c"
+#   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+# )
 
 add_library(
   quickray
