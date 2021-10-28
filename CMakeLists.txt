@@ -26,7 +26,7 @@ set(BUILD_GAMES    OFF CACHE BOOL "" FORCE) # or games
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/raylib)
 
 # TODO: using BUILD_IN_SOURCE against recommendation. might be possible to use it without
-ExternalProject_Add(
+externalproject_add(
   quickjs
   BUILD_IN_SOURCE TRUE
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/quickjs
@@ -36,7 +36,7 @@ ExternalProject_Add(
 
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/quickray.c
-  COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/lib/quickjs/qjs ${CMAKE_CURRENT_SOURCE_DIR}/generate-raylib.js ${CMAKE_CURRENT_SOURCE_DIR}/lib/raylib/parser/raylib_api.json > ${CMAKE_CURRENT_BINARY_DIR}/quickray.c
+  COMMAND lib/quickjs/qjs generate-raylib.js lib/raylib/parser/raylib_api.json > ${CMAKE_CURRENT_BINARY_DIR}/quickray.c
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 

@@ -208,7 +208,14 @@ static JSValue wrapped_${method.name}(JSContext* ctx, JSValueConst this_val, int
 }
 `).join('\n  ').replace(/ {2}\n/g, '')
 
-const liststring = functions.map(method => `JS_CFUNC_DEF("${method.name}", ${Object.values(method.params || {}).length}, wrapped_${method.name})`).join(',\n  ')
+const liststring = functions
+  .map(method => `  JS_CFUNC_DEF("${method.name}", ${Object.values(method.params || {}).length}, wrapped_${method.name})`)
+  .join(',\n') +
+  ',\n  ' + enums
+  .map(ea => ea.values.map(v => v.name))
+  .reduce((a, v) => [...a, ...v], [])
+  .map(e => `JS_PROP_INT32_DEF("${e}", ${e}, JS_PROP_CONFIGURABLE )`)
+  .join(',\n  ')
 
 const out = `// This was auto-generated. Run qjs generate-raylib.js
 #include "stdio.h"
@@ -221,19 +228,19 @@ const out = `// This was auto-generated. Run qjs generate-raylib.js
 
 ${fstring}
 
-static const JSCFunctionListEntry wrapped_js_funcs[] = {
-  ${liststring}
+static const JSCFunctionListEntry raylib_exported_interface[] = {
+${liststring}
 };
 
 static int js_rl_init(JSContext* ctx, JSModuleDef* m) {
   js_rl_init_classes(ctx, m);
-  return JS_SetModuleExportList(ctx, m, wrapped_js_funcs, countof(wrapped_js_funcs));
+  return JS_SetModuleExportList(ctx, m, raylib_exported_interface, countof(raylib_exported_interface));
 }
 
 JSModuleDef* js_init_module(JSContext* ctx, const char* module_name) {
   JSModuleDef* m = JS_NewCModule(ctx, module_name, js_rl_init);
   if (!m) return NULL;
-  JS_AddModuleExportList(ctx, m, wrapped_js_funcs, countof(wrapped_js_funcs));
+  JS_AddModuleExportList(ctx, m, raylib_exported_interface, countof(raylib_exported_interface));
   js_rl_init_module_classes(ctx, m);
   return m;
 }`
