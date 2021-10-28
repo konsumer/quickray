@@ -7,7 +7,7 @@ const { enums, structs, functions } = JSON.parse(loadFile('lib/raylib/parser/ray
 // simple helper to simplify output-types
 const call = func => `${func.name}(${Object.values(func.params || {}).join(', ')})`
 
-// I outputted the names like this:
+// I outputted the input/output names like this:
 /*
 const inputs = new Set()
 const outputs = new Set()
@@ -73,12 +73,37 @@ const inputTypes = {
   VrStereoConfig: () => [],
   Wave: () => [],
   'Wave *': () => [],
-  bool: () => [],
-  char: () => [],
-  'char *': () => [],
+
+  bool: (p, i) => [
+    `bool ${p.name} = JS_ToBool(ctx, argv[${i}]);`
+  ],
+
+  char: (p, i) => [
+    `const char ${p.name} = NULL;`,
+    `${p.name} = JS_ToCString(ctx, argv[${i}]);`,
+    'if (title == NULL) return JS_EXCEPTION;'
+  ],
+
+  'char *': (p, i) => [
+    `const char ${p.name} = NULL;`,
+    `${p.name} = JS_ToCString(ctx, argv[${i}]);`,
+    'if (title == NULL) return JS_EXCEPTION;'
+  ],
+
   'const CharInfo *': () => [],
-  'const char *': () => [],
-  'const char **': () => [],
+
+  'const char *': (p, i) => [
+    `const char ${p.name} = NULL;`,
+    `${p.name} = JS_ToCString(ctx, argv[${i}]);`,
+    'if (title == NULL) return JS_EXCEPTION;'
+  ],
+
+  'const char **': (p, i) => [
+    `const char ${p.name} = NULL;`,
+    `${p.name} = JS_ToCString(ctx, argv[${i}]);`,
+    'if (title == NULL) return JS_EXCEPTION;'
+  ],
+
   'const unsigned char *': () => [],
   'const void *': () => [],
   float: () => [],
@@ -120,14 +145,25 @@ const outputTypes = {
   Vector4: () => [],
   VrStereoConfig: () => [],
   Wave: () => [],
-  bool: m => [`return JS_NewBool(ctx, ${call(m)});`],
+
+  bool: m => [
+    `return JS_NewBool(ctx, ${call(m)});`
+  ],
+
   'char *': () => [],
   'char **': () => [],
   'const char *': () => [],
   'const char **': () => [],
   double: () => [],
-  float: m => [`return JS_NewFloat64(ctx, ${call(m)});`],
-  'float *': m => [`return JS_NewFloat64(ctx, &${call(m)});`],
+
+  float: m => [
+    `return JS_NewFloat64(ctx, ${call(m)});`
+  ],
+
+  'float *': m => [
+    `return JS_NewFloat64(ctx, &${call(m)});`
+  ],
+
   int: () => [],
   'int *': () => [],
   long: () => [],
