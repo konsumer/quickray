@@ -15,6 +15,8 @@ for (const func of functions) {
   for (const o of Object.values(func.params || {})) {
     if (o && o !== '') {
       inputs.add(o)
+    } else {
+      inputs.add('void')
     }
   }
   outputs.add(func.returnType)
@@ -118,7 +120,7 @@ const outputTypes = {
   Vector4: () => [],
   VrStereoConfig: () => [],
   Wave: () => [],
-  bool: () => [],
+  bool: () => [`return JS_NewBool(ctx, ${call(m)});`],
   'char *': () => [],
   'char **': () => [],
   'const char *': () => [],
