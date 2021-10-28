@@ -31,14 +31,11 @@ ExternalProject_Add(
   BUILD_COMMAND make
   INSTALL_COMMAND ""
 )
+include_directories(lib)
 
 # TODO: generate quickray.c (for quickjs) from lib/raylib/parser/raylib_api.json before build
-
 
 add_library(
   quickray
   SHARED quickray.c
 )
-
-# TODO: Need to figure out how to link quickjs & raylib
-# target_link_libraries(quickray PRIVATE raylib PRIVATE quickjs)
