@@ -7,26 +7,8 @@ import { loadFile } from 'std'
 
 const { enums, structs, functions } = JSON.parse(loadFile(scriptArgs[1]))
 
-// simple helper to simplify output-types
+// helper to simplify output-types
 const call = func => `${func.name}(${Object.keys(func.params || {}).join(', ')})`
-
-// I outputted the input/output names like this:
-/*
-const inputs = new Set()
-const outputs = new Set()
-for (const func of functions) {
-  for (const o of Object.values(func.params || {})) {
-    if (o && o !== '') {
-      inputs.add(o)
-    } else {
-      inputs.add('void')
-    }
-  }
-  outputs.add(func.returnType)
-}
-console.log(JSON.stringify([...inputs].sort(), null, 2))
-console.log(JSON.stringify([...outputs].sort(), null, 2))
-*/
 
 // how do I convert this input to js-wrapper C?
 const inputTypes = {
@@ -37,7 +19,21 @@ const inputTypes = {
   Camera2D: () => [],
   Camera3D: () => [],
   'CharInfo *': () => [],
-  Color: () => [],
+
+  Color: (p, i) => [
+    `Color ${p} = BLACK;`,
+    `int ${p}Int;`,
+    `if (JS_IsNumber(argv[${i}])) {`,
+    `  if (JS_ToInt32(ctx, &${p}Int, argv[$1])) {`,
+    `    ${p} = GetColor(${p}Int);`,
+    '  } else {',
+    `    return JS_Throw(ctx, JS_NewString(ctx, "Bad Color value for ${p}"));`,
+    '  }',
+    `} else if (JS_IsObject(argv[${i}])){`,
+    `  ${p} = *(Color*)JS_GetOpaque2(ctx, argv[${i}], wrapper_struct_Color_class_id);`,
+    '}'
+  ],
+
   'Color *': () => [],
   Font: () => [],
   Image: () => [],
@@ -162,11 +158,25 @@ const outputTypes = {
     `return JS_NewBool(ctx, ${call(m)});`
   ],
 
-  'char *': () => [],
-  'char **': () => [],
-  'const char *': () => [],
-  'const char **': () => [],
-  double: () => [],
+  'char *': () => [
+    `return JS_NewString(ctx, &${call(m)});`
+  ],
+
+  'char **': () => [
+    `return JS_NewString(ctx, &${call(m)});`
+  ],
+
+  'const char *': () => [
+    `return JS_NewString(ctx, &${call(m)});`
+  ],
+
+  'const char **': () => [
+    `return JS_NewString(ctx, &${call(m)});`
+  ],
+
+  double: () => [
+    `return JS_NewFloat64(ctx, ${call(m)});`
+  ],
 
   float: m => [
     `return JS_NewFloat64(ctx, ${call(m)});`
@@ -176,11 +186,25 @@ const outputTypes = {
     `return JS_NewFloat64(ctx, &${call(m)});`
   ],
 
-  int: () => [],
-  'int *': () => [],
-  long: () => [],
-  'unsigned char *': () => [],
-  'unsigned int': () => [],
+  int: m => [
+    `return JS_NewInt32(ctx, ${call(m)});`
+  ],
+
+  'int *': () => [
+    `return JS_NewInt32(ctx, &${call(m)});`
+  ],
+
+  long: () => [
+    `return JS_NewFloat64(ctx, ${call(m)});`
+  ],
+
+  'unsigned char *': () => [
+    `return JS_NewString(ctx, &${call(m)});`
+  ],
+
+  'unsigned int': () => [
+    `return JS_NewInt32(ctx, ${call(m)});`
+  ],
 
   void: m => [
     `${call(m)};`,
